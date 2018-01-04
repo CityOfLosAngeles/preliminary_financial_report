@@ -46,6 +46,9 @@ plotData = function(error, data, dataType) {
     x.domain(data.map(function(d) { return d.year; }));
     y.domain([0, 0.16]);
 
+  // most recent year of data
+  var current_year = d3.max(data.map(function(d) {return d.year}));
+
   // draw x axis
   graph.append("g")
       .style('font-size', axisTextSize)
@@ -156,7 +159,7 @@ plotData = function(error, data, dataType) {
 
     myText = graph.append('text')
       .attr('id', 'label2')
-      .attr('x', x(2017) + x.bandwidth())
+      .attr('x', x(current_year) + x.bandwidth())
       .attr('y', y(0.063))
       .attr('text-anchor', 'end')
       .attr('fill', 'white')
@@ -177,7 +180,7 @@ plotData = function(error, data, dataType) {
     myText.remove();
     myText = graph.append('text')
       .attr('id', 'label2')
-      .attr('x', x(2017) + x.bandwidth())
+      .attr('x', x(current_year) + x.bandwidth())
       .attr('y', y(0.063))
       .attr('text-anchor', 'end')
       .attr('font-size', axisTextSize)
@@ -199,7 +202,7 @@ plotData = function(error, data, dataType) {
     .attr('fill', 'none');
 
   graph.append('text')
-    .attr('x', x(2017) + x.bandwidth())
+    .attr('x', x(current_year) + x.bandwidth())
     .attr('y', y(0.152))
     .attr('text-anchor', 'end')
     .attr('font-size', axisTextSize)

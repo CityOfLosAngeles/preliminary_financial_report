@@ -1,7 +1,7 @@
 // inspiration from https://bl.ocks.org/mbostock/3885304
 
 // global variable for the most recent year
-var current_year = 2017;
+var current_year = 2018;
 
 // function to call on the data
 plotData = function(error, data, dataType) {

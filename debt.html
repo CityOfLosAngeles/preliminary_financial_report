@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Debt</title>
+  <link rel="stylesheet" href="bootstrap.min.css">
+  <link rel="stylesheet" href="debt.css">
+</head>
+
+<body>
+  <div class="container">
+    <h2>Debt: </h2>
+    <h5>Ratio of Debt Service Requirements to General Fund Receipts</h5>
+    <div class="row">
+      <div class="col">
+        <span class="toolbar_label">Scale by:
+        <span id="view_toolbar" class="btn-group" data-toggle="buttons">
+          <label id="percentages" class="btn btn-secondary active"><input type="radio" autocomplete="off">Percentages</label>
+          <label id="values" class="btn btn-secondary"><input type="radio" autocomplete="off">Values</label>
+        </span></span>
+      </div>
+    </div>
+    <div id="vis"></div>
+  </div>
+  <div style="height:100px"></div>
+  <div class="footer">
+    <p>This chart was made using <a href="https://d3js.org">D3.js</a>.</p>
+  </div>
+
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="floatingTooltip.js"></script>
+  <script src="stringFormatting.js"></script>
+  <script src='debt.js'></script>
+
+</body>

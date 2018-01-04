@@ -1,1 +1,1 @@
-GitHub repository for code and other files relevant to the 2016-17 Preliminary Financial Report.
+GitHub repository for code and other files relevant to the Preliminary Financial Report.

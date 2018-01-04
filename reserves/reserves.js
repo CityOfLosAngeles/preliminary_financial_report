@@ -47,7 +47,7 @@ plotData = function(error, data, dataType) {
   y.domain([0, 0.12]);
 
   // first year of data
-  var beginning_year = d3.max(data.map(function(d){return d.year}));
+  var beginning_year = d3.min(data.map(function(d){return d.year}));
 
 
   // draw x axis

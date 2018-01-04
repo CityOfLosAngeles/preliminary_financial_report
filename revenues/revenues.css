@@ -1,0 +1,117 @@
+body {
+  padding-top: 20px;
+}
+
+a, a:visited, a:active {
+  color: #444;
+}
+
+/*
+.container {
+  max-width: 1000px;
+  max-height: 450px;
+  margin: auto;
+}
+*/
+
+.toolbar_label {
+   white-space:nowrap;
+}
+
+.btn {
+  padding: 5px 5px 5px 5px;
+}
+
+.btn-group {
+  padding: 0px 0px 0px 10px;
+  margin-top: 5px;
+}
+
+.btn-secondary:active, .btn-secondary.active, .btn-secondary:hover {
+    border: 1px solid rgba(0, 153, 204, 1);
+    background: rgba(0, 153, 204, 0.3);
+}
+
+.grayOut {
+  opacity: 0.5;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.highlighted{
+  stroke: #000;
+}
+
+.category {
+  fill: #777;
+  cursor: default;
+}
+
+#floatingTooltip {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  -moz-border-radius:5px;
+  border-radius: 5px;
+  border: 2px solid #000;
+  background: #fff;
+  opacity: .9;
+  color: black;
+  padding: 10px;
+  font-size: 12px;
+  z-index: 10;
+}
+
+.tooltip .name {
+  font-weight:bold;
+}
+
+.tooltip .heading {
+  text-decoration:underline;
+}
+
+.tooltip .item {
+  font-style: italic;
+}
+
+.tooltip td
+{
+    padding:0 10px 0 10px;
+}
+
+.description g {
+  padding: 0px;
+  margin-top: 0px;
+}
+
+.description p {
+  padding: 0px;
+  margin-top: 0px;
+  font-size: 13px;
+}
+
+.line {
+  fill: none;
+  stroke-width: 2px;
+  shape-rendering: geometricPrecision;
+}
+
+.axis path,
+
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font: 12px sans-serif;
+}
+
+.footer {
+  text-align: center;
+  font-size: 13px;
+  line-height: 50%;
+}

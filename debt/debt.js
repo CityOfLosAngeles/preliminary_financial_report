@@ -1,5 +1,8 @@
 // inspiration from https://bl.ocks.org/mbostock/3885304
 
+// global variable for the most recent year
+var current_year = 2017;
+
 // function to call on the data
 plotData = function(error, data, dataType) {
   if (error) throw error;
@@ -156,7 +159,7 @@ plotData = function(error, data, dataType) {
 
     myText = graph.append('text')
       .attr('id', 'label2')
-      .attr('x', x(2017) + x.bandwidth())
+      .attr('x', x(current_year) + x.bandwidth())
       .attr('y', y(0.063))
       .attr('text-anchor', 'end')
       .attr('fill', 'white')
@@ -177,7 +180,7 @@ plotData = function(error, data, dataType) {
     myText.remove();
     myText = graph.append('text')
       .attr('id', 'label2')
-      .attr('x', x(2017) + x.bandwidth())
+      .attr('x', x(current_year) + x.bandwidth())
       .attr('y', y(0.063))
       .attr('text-anchor', 'end')
       .attr('font-size', axisTextSize)
@@ -199,7 +202,7 @@ plotData = function(error, data, dataType) {
     .attr('fill', 'none');
 
   graph.append('text')
-    .attr('x', x(2017) + x.bandwidth())
+    .attr('x', x(current_year) + x.bandwidth())
     .attr('y', y(0.152))
     .attr('text-anchor', 'end')
     .attr('font-size', axisTextSize)

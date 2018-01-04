@@ -1,8 +1,5 @@
 // inspiration from https://bl.ocks.org/mbostock/3885304
 
-// global variable for the most recent year
-var current_year = 2017;
-
 // function to call on the data
 plotData = function(error, data, dataType) {
   if (error) throw error;
@@ -48,6 +45,9 @@ plotData = function(error, data, dataType) {
 
     x.domain(data.map(function(d) { return d.year; }));
     y.domain([0, 0.16]);
+
+  // most recent year of data
+  var current_year = d3.max(data.map(function(d) {return d.year}));
 
   // draw x axis
   graph.append("g")

@@ -46,6 +46,10 @@ plotData = function(error, data, dataType) {
   x.domain(data.map(function(d) { return d.year; }));
   y.domain([0, 0.12]);
 
+  // first year of data
+  var beginning_year = d3.max(data.map(function(d){return d.year}));
+
+
   // draw x axis
   graph.append("g")
       .style('font-size', axisTextSize)
@@ -149,7 +153,7 @@ plotData = function(error, data, dataType) {
 
   graph.append('text')
     .attr('class', 'policyText')
-    .attr('x', x(2009))
+    .attr('x', x(beginning_year))
     .attr('y', y(0.052))
     .attr('font-size', axisTextSize)
     .text('5% Reserve Fund policy');

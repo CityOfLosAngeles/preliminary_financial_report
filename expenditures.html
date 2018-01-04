@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Expenditures</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/expenditures.css">
+  <link rel="stylesheet" href="css/typeahead.css">
+</head>
+<body>
+  
+  <div class="container">
+    <div class="row">
+      <div class="col col-md-1"></div>
+      <div class="col">
+        <h1 id="heading">Expenditures: Total, Salaries, and Other</h1>
+        <div style="height:10px"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col col-md-1"></div>
+      <div class="col">
+        <span class="toolbar_label">Fiscal Year:
+        <span id="year_toolbar" class="btn-group" data-toggle="buttons">
+          <label id="2008" class="btn btn-secondary"><input type="radio" autocomplete="off">2008</label>
+          <label id="2009" class="btn btn-secondary"><input type="radio" autocomplete="off">2009</label>
+          <label id="2010" class="btn btn-secondary"><input type="radio" autocomplete="off">2010</label>
+          <label id="2011" class="btn btn-secondary"><input type="radio" autocomplete="off">2011</label>
+          <label id="2012" class="btn btn-secondary"><input type="radio" autocomplete="off">2012</label>
+          <label id="2013" class="btn btn-secondary"><input type="radio" autocomplete="off">2013</label>
+          <label id="2014" class="btn btn-secondary"><input type="radio" autocomplete="off">2014</label>
+          <label id="2015" class="btn btn-secondary"><input type="radio" autocomplete="off">2015</label>
+          <label id="2016" class="btn btn-secondary"><input type="radio" autocomplete="off">2016</label>
+          <label id="2017" class="btn btn-secondary active"><input type="radio" checked autocomplete="off">2017</label>
+        </span></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col col-md-1"></div>
+      <div class="col">
+      <span class="toolbar_label">Scale by:
+      <span id="scale_toolbar" class="btn-group" data-toggle="buttons">
+        <label id="total" class="btn btn-secondary active"><input type="radio" autocomplete="off">Total</label>
+        <label id="salaries" class="btn btn-secondary"><input type="radio" autocomplete="off">Salaries</label>
+        <label id="other" class="btn btn-secondary"><input type="radio" autocomplete="off">Other</label>
+      </span></span>
+
+        <span  class="toolbar_label">Group by:
+        <span id="split_toolbar" class="btn-group" data-toggle="buttons">
+          <label id="all" class="btn btn-secondary active"><input type="radio" autocomplete="off">All</label>
+          <label id="category" class="btn btn-secondary"><input type="radio" autocomplete="off">Category</label>
+        </span></span>
+
+        <span  class="toolbar_label">Color by:
+        <span id="color_toolbar" class="btn-group" data-toggle="buttons">
+          <label id="category" class="btn btn-secondary active"><input type="radio" autocomplete="off">Category</label>
+          <label id="growth" class="btn btn-secondary"><input type="radio" autocomplete="off">% growth of total</label>
+        </span></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col col-md-1"></div>
+      <div class="col">
+        <input id="searchbar" style="width:600px" type="text" class="typeahead tt-query notClicked" placeholder="Search for an item (hit tab to autocomplete)">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col col-md-1"></div>
+      <div class="col">
+        <div id="vis"></div>
+      </div>
+    </div>
+      
+    <div class="footer">
+      <p>Animated bubble chart inspired by previous work by the <a href="http://www.nytimes.com/interactive/2012/02/13/us/politics/2013-budget-proposal-graphic.html">New York Times</a>. Code derived from the <a href="http://vallandingham.me/bubble_charts_in_js.html">tutorial by Jim Vallandingham</a>.</p>
+<p>This project was built using a number of open source tools, including <a href="https://d3js.org">D3.js</a>, <a href="https://jquery.com">jQuery</a>, <a href="http://getbootstrap.com">Bootstrap</a>, <a href="https://twitter.github.io/typeahead.js/">typeahead.js</a>, and <a href="https://modernizr.com">modernizr</a>.</p>
+  </div>
+  </div>
+
+  <script src="lib/d3.js"></script>
+  <script src="lib/jQuery3.2.1.js"></script>
+  <script src="lib/typeahead.js"></script>
+  <script src="lib/stringFormatting.js"></script>
+  <script src="lib/modernizr.foreignObject.js"></script>
+  <script src="lib/floatingTooltip.js"></script>
+  <script src="expenditures.js"></script>
+  <script src="lib/typeahead_setup.js""></script>
+
+
+</body>
+</html>

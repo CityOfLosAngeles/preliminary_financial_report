@@ -189,7 +189,6 @@ function bubbleChart() {
         fy: fy
       };
 
-      myVar = out;
       return(out);
     });
 
@@ -693,32 +692,31 @@ function bubbleChart() {
     itemName = d3.selectAll('text').filter('.name');
     itemName.text(d.name);
 
-    // putting together the graph
-    var parseTime = d3.time.format("%Y").parse;
-
     var ymin = d3.min([d3.min(salaryArray), d3.min(otherArray)])/1e6;
     var ymax = d3.max([d3.max(salaryArray), d3.max(otherArray)])/1e6;
     //var ymin = d3.min([d3.min(salaryArray), d3.min(otherArray), d3.min(budgetArray)])/1e6;
     //var ymax = d3.max([d3.max(salaryArray), d3.max(otherArray), d3.max(budgetArray)])/1e6;
 
+    var parseTime = d3.time.format("%Y").parse;
+
     var xScale = d3.time.scale()
       .range([graphX, graphX + graphWidth])
-      .domain([d3.min(yearArray),d3.max(yearArray)]);
+      .domain([parseTime(d3.min(yearArray).toString()),parseTime(d3.max(yearArray).toString())]);
     var yScale = d3.scale.linear()
       .range([graphY + graphHeight, graphY])
       .domain([ymin, ymax])
       .nice();
 
     var budgetLine = d3.svg.line()
-      .x(function(d) { return xScale(d.year); })
+      .x(function(d) { return xScale(parseTime(d.year.toString())); })
       .y(function(d) { return yScale(d.budget); });
 
     var salaryLine = d3.svg.line()
-      .x(function(d) { return xScale(d.year); })
+      .x(function(d) { return xScale(parseTime(d.year.toString())); })
       .y(function(d) { return yScale(d.salary); });
 
     var otherLine = d3.svg.line()
-      .x(function(d) { return xScale(d.year); })
+      .x(function(d) { return xScale(parseTime(d.year.toString())); })
       .y(function(d) { return yScale(d.other); });
     
     svg.append("g")
@@ -746,13 +744,6 @@ function bubbleChart() {
       .enter().append('g')
       .attr('class', 'item');
 
-    //item.append('path')
-    //  .attr('class', 'line')
-    //  .classed('detail', true)
-    //  .attr('d', function (d) {return budgetLine(myData);})
-    //  .attr('stroke', 'black')
-    //  .attr('opacity', 1);
-
     item.append('path')
       .attr('class', 'line')
       .classed('detail', true)
@@ -776,8 +767,6 @@ function bubbleChart() {
     var x = graphX + graphWidth/2 - 60;
     var y = graphY + graphHeight + 35;
     var size = 10;
-    //var colors = ['black', 'steelblue', 'darkgreen'];
-    //var labels = ['Budget', 'Salaries', 'Other'];
     var colors = ['steelblue', 'darkgreen'];
     var labels = ['Salaries', 'Other'];
     var n = colors.length;

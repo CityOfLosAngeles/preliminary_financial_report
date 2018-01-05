@@ -154,12 +154,7 @@ function bubbleChart() {
 
       // complile arrays of expenditures, budget, salaries, and other for this node
       var extract = function(varName) {
-        out = [];
-        for (i=0; i<myKeys.length; i++) {
-          if (myKeys[i].match(varName)) {
-            out.push(+d[myKeys[i]]);
-          }
-        }
+        out = fy.map(function(fyTmp) {return(+d[fyTmp + varName])});
         return(out);
       }
 
@@ -188,7 +183,7 @@ function bubbleChart() {
         pctGrowth: pctGrowthTmp,
         fy: fy
       };
-
+      myVar = out;
       return(out);
     });
 
@@ -306,6 +301,7 @@ function bubbleChart() {
         }
       }
     }
+    fy.sort();
 
     // Use the max FY_2017_Actual_Receipts in the data as the max in the scale's domain
     // note we have to ensure the FY_2017_Actual_Receipts is a number by converting it

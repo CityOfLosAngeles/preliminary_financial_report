@@ -1,5 +1,8 @@
 // Expenditures bubble chart script.
 
+// global namespace variable, for programming/debugging purposes
+var myVar;
+
 // Organization and style taken from https://github.com/vlandham/bubble_chart/blob/gh-pages/src/bubble_chart.js
 // which was in turn inspired by https://bost.ocks.org/mike/chart/
 
@@ -75,6 +78,54 @@ function bubbleChart() {
     .range([3, height/7.5]);
 
 
+  // add buttons to the year toolbar
+  function addYearButtons(rawData) {
+    var myKeys = Object.keys(rawData[0]);
+    var endVar = myKeys[myKeys.length - 1];
+    var endYear = 2000 + +endVar.substring(2,4);
+    var begYear = endYear - 9;
+
+    for (var i=0; i<myKeys.length; i++) {
+      d3.select('#year_toolbar').append('label')
+        .attr('id', 'y' + i)
+        .attr('class', 'btn btn-secondary')
+        .text(begYear + i)
+        .append('input')
+        .attr('type','radio')
+        .attr('autocomplete','off');
+    }
+
+    // activate the button for the most recent year
+    d3.select('#y' + endYear).classed('active',true);
+
+    // resize the buttons
+    d3.selectAll('.btn-group').selectAll('.btn').attr('style', "font-size: " + entry_size);
+  }
+
+  // Sets up the buttons to allow for toggling between different options.
+  function setupButtons() {
+    d3.selectAll('.btn-group')
+      .selectAll('.btn')
+      .on('click', function () {
+        // set all buttons on the clicked toolbar as inactive, then activate the clicked button
+        var p = d3.select(this.parentNode);
+        p.selectAll('.btn').classed('active', false);
+        d3.select(this).classed('active', true);
+
+        // toggle
+        if (p.attr('id')=='scale_toolbar') {
+          myBubbleChart.toggleScale();
+        } else if (p.attr('id')=='split_toolbar') {
+          myBubbleChart.toggleDisplay();
+        } else if (p.attr('id')=='color_toolbar') {
+          myBubbleChart.toggleColor();
+        } else if (p.attr('id')=='year_toolbar') {
+          myBubbleChart.toggleYear();
+        }
+      });
+  }
+
+
   /*
    * This data manipulation function takes the raw data from
    * the CSV file and converts it into an array of node objects.
@@ -85,83 +136,42 @@ function bubbleChart() {
    * array for each element in the rawData input.
    */
 
-  function createNodes(rawData) {
+  function createNodes(rawData, fy) {
 
     // calculate the total budget for each year
-    var total_budget17 = d3.sum(rawData, function (d) { return +d.fy17budget; });
-    var total_budget16 = d3.sum(rawData, function (d) { return +d.fy16budget; });
-    var total_budget15 = d3.sum(rawData, function (d) { return +d.fy15budget; });
-    var total_budget14 = d3.sum(rawData, function (d) { return +d.fy14budget; });
-    var total_budget13 = d3.sum(rawData, function (d) { return +d.fy13budget; });
-    var total_budget12 = d3.sum(rawData, function (d) { return +d.fy12budget; });
-    var total_budget11 = d3.sum(rawData, function (d) { return +d.fy11budget; });
-    var total_budget10 = d3.sum(rawData, function (d) { return +d.fy10budget; });
-    var total_budget09 = d3.sum(rawData, function (d) { return +d.fy09budget; });
-    var total_budget08 = d3.sum(rawData, function (d) { return +d.fy08budget; });
+    var total_budget = fy.map(function(d) {
+      var out = d3.sum(rawData, function (dd) { return +dd[d + 'budget']; });
+      return(out);
+    })
+    myVar = total_budget;
 
-    // Use map() to convert raw data into node data
+    // Use map() to convert raw data into node data, converting all fy names to fy0 through fy10
     var myNodes = rawData.map(function (d) {
-      return {
+      var nYears = fy.length;
+      // create an object with basic node information
+      var out = {
         x: Math.random() * 900,
         y: Math.random() * 800,
         id: d.id,
         category: d.category,
-        radius: radiusScale(+d.fy17salaries + +d.fy17other),
-        value: +d.fy17salaries + +d.fy17other,
+        radius: radiusScale(+d[fy[nYears - 1] + 'salaries'] + +d[fy[nYears - 1] + 'other']),
+        value: +d[fy[nYears - 1] + 'salaries'] + +d[fy[nYears - 1] + 'other'],
         name: d.name,
-        description: d.description,
-        FY17Expenditures: +d.fy17salaries + +d.fy17other,
-        FY16Expenditures: +d.fy16salaries + +d.fy16other,
-        FY15Expenditures: +d.fy15salaries + +d.fy15other,
-        FY14Expenditures: +d.fy14salaries + +d.fy14other,
-        FY13Expenditures: +d.fy13salaries + +d.fy13other,
-        FY12Expenditures: +d.fy12salaries + +d.fy12other,
-        FY11Expenditures: +d.fy11salaries + +d.fy11other,
-        FY10Expenditures: +d.fy10salaries + +d.fy10other,
-        FY09Expenditures: +d.fy09salaries + +d.fy09other,
-        FY08Expenditures: +d.fy08salaries + +d.fy08other,
-        FY07Expenditures: +d.fy07salaries + +d.fy07other,
-        FY17Budget: +d.fy17budget,
-        FY16Budget: +d.fy16budget,
-        FY15Budget: +d.fy15budget,
-        FY14Budget: +d.fy14budget,
-        FY13Budget: +d.fy13budget,
-        FY12Budget: +d.fy12budget,
-        FY11Budget: +d.fy11budget,
-        FY10Budget: +d.fy10budget,
-        FY09Budget: +d.fy09budget,
-        FY08Budget: +d.fy08budget,
-        FY17Salaries: +d.fy17salaries,
-        FY16Salaries: +d.fy16salaries,
-        FY15Salaries: +d.fy15salaries,
-        FY14Salaries: +d.fy14salaries,
-        FY13Salaries: +d.fy13salaries,
-        FY12Salaries: +d.fy12salaries,
-        FY11Salaries: +d.fy11salaries,
-        FY10Salaries: +d.fy10salaries,
-        FY09Salaries: +d.fy09salaries,
-        FY08Salaries: +d.fy08salaries,        
-        FY17Other: +d.fy17other,
-        FY16Other: +d.fy16other,
-        FY15Other: +d.fy15other,
-        FY14Other: +d.fy14other,
-        FY13Other: +d.fy13other,
-        FY12Other: +d.fy12other,
-        FY11Other: +d.fy11other,
-        FY10Other: +d.fy10other,
-        FY09Other: +d.fy09other,
-        FY08Other: +d.fy08other,
-        FY17Percent: 100 * d.fy17budget / total_budget17,
-        FY16Percent: 100 * d.fy16budget / total_budget16,
-        FY15Percent: 100 * d.fy15budget / total_budget15,
-        FY14Percent: 100 * d.fy14budget / total_budget14,
-        FY13Percent: 100 * d.fy13budget / total_budget13,
-        FY12Percent: 100 * d.fy12budget / total_budget12,
-        FY11Percent: 100 * d.fy11budget / total_budget11,
-        FY10Percent: 100 * d.fy10budget / total_budget10,
-        FY09Percent: 100 * d.fy09budget / total_budget09,
-        FY08Percent: 100 * d.fy08budget / total_budget08
+        description: d.description
       };
+      // add on the relevant expenditure info
+      for (var i=0; i<nYears; i++) {
+        out['FY' + i + 'Expenditures'] = +d[fy[i] + 'salaries'] + +d[fy[i] + 'other'];
+        out['FY' + i + 'Budget'] = +d[fy[i] + 'budget'];
+        out['FY' + i + 'Salaries'] = +d[fy[i] + 'salaries'];
+        out['FY' + i + 'Other'] = +d[fy[i] + 'other'];
+      }
+      // calculate budget as % of total budget and % growth of expenditures
+      for (var i=1; i<nYears; i++) {
+        out['FY' + i + 'Percent'] = 100 * d[fy[i] + 'budget'] / total_budget[i];
+        out['FY' + i + 'PercentGrowth'] = ((d['FY' + i + 'Expenditures'] / d['FY' + (i-1) + 'Expenditures']) - 1) * 100;
+      }
+      return(out);
     });
 
     // sort them to prevent occlusion of smaller nodes (large circles made first)
@@ -265,13 +275,31 @@ function bubbleChart() {
    * a d3 loading function like d3.csv.
    */
   var chart = function chart(selector, rawData) {
+
+    // create an array of the available fiscal years, e.g. fy=['fy07','fy08','fy09',...]
+    var myKeys = Object.keys(rawData[0]);
+    var fy = [];
+    for (var i=0; i<myKeys.length; i++) {
+      var x = myKeys[i];
+      var m = x.match('fy[0-9]{2}');
+      if (m) {
+        if (fy.indexOf(m[0])==-1) {
+          fy.push(m[0]);
+        }
+      }
+    }
+
     // Use the max FY_2017_Actual_Receipts in the data as the max in the scale's domain
     // note we have to ensure the FY_2017_Actual_Receipts is a number by converting it
     // with `+`.
-    var maxAmount = d3.max(rawData, function (d) { return +d.fy17salaries + +d.fy17other; });
+    var maxAmount = d3.max(rawData, function (d) { return +d[fy[fy.length - 1] + 'salaries'] + +d[fy[fy.length - 1] + 'other']; });
     radiusScale.domain([0, maxAmount]);
 
-    var nodes = createNodes(rawData);
+    addYearButtons(rawData);
+
+    setupButtons();
+
+    var nodes = createNodes(rawData, fy);
     // Set the force's nodes to our newly created nodes array.
     force.nodes(nodes);
 
@@ -387,7 +415,7 @@ function bubbleChart() {
 
   function colorGrowth() {
     // select current year, for calcuating percent growth
-    currentYear = d3.select('#year_toolbar').selectAll('.btn').filter('.active').attr('id');
+    currentYear = d3.select('#year_toolbar').selectAll('.btn').filter('.active').attr('id').match(/\d+/g)[0];
 
     // change colors based on percent growth
     svg.selectAll('circle')
@@ -519,7 +547,7 @@ function bubbleChart() {
     r = +d3.select(this).attr('r');
 
     // select current fiscal year for generating content
-    currentYear = d3.select('#year_toolbar').selectAll('.btn').filter('.active').attr('id');
+    currentYear = d3.select('#year_toolbar').selectAll('.btn').filter('.active').attr('id').match(/\d+/g)[0];
 
     // necessary variables for generating content
     fiscal_years = ["2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008"];
@@ -878,7 +906,7 @@ function bubbleChart() {
   chart.toggleYear = function () {
 
     // find the active year, color scheme, and scaling variable
-    currentYear = d3.select('#year_toolbar').selectAll('.btn').filter('.active').attr('id');
+    currentYear = d3.select('#year_toolbar').selectAll('.btn').filter('.active').attr('id').match(/\d+/g)[0];
     colorScheme = d3.select('#color_toolbar').selectAll('.btn').filter('.active').attr('id');
     currentScale = d3.select('#scale_toolbar').selectAll('.btn').filter('.active').attr('id');
 
@@ -925,7 +953,7 @@ function bubbleChart() {
   chart.toggleScale = function () {
     // find the active scale, year, and color schemes
     currentScale = d3.select('#scale_toolbar').selectAll('.btn').filter('.active').attr('id');
-    currentYear = d3.select('#year_toolbar').selectAll('.btn').filter('.active').attr('id');
+    currentYear = d3.select('#year_toolbar').selectAll('.btn').filter('.active').attr('id').match(/\d+/g)[0];
     colorScheme = d3.select('#color_toolbar').selectAll('.btn').filter('.active').attr('id');
 
     // select all the circles and bubbles
@@ -957,29 +985,6 @@ function display(error, data) {
   myBubbleChart('#vis', data);
 }
 
-// Sets up the buttons to allow for toggling between different options.
-function setupButtons() {
-  d3.selectAll('.btn-group')
-    .selectAll('.btn')
-    .on('click', function () {
-      // set all buttons on the clicked toolbar as inactive, then activate the clicked button
-      var p = d3.select(this.parentNode);
-      p.selectAll('.btn').classed('active', false);
-      d3.select(this).classed('active', true);
-
-      // toggle
-      if (p.attr('id')=='scale_toolbar') {
-        myBubbleChart.toggleScale();
-      } else if (p.attr('id')=='split_toolbar') {
-        myBubbleChart.toggleDisplay();
-      } else if (p.attr('id')=='color_toolbar') {
-        myBubbleChart.toggleColor();
-      } else if (p.attr('id')=='year_toolbar') {
-        myBubbleChart.toggleYear();
-      }
-    });
-}
-
 // function to disable the buttons when in detail view
 function disableButtons() {
   d3.selectAll('.btn-group')
@@ -993,5 +998,3 @@ d3.csv('data/expenditures.csv', display);
 // has the user been warned about compatibility issues?
 var warned = false;
 
-// set up the buttons.
-setupButtons();

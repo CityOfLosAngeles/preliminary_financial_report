@@ -79,13 +79,14 @@ function bubbleChart() {
 
 
   // add buttons to the year toolbar
-  function addYearButtons(rawData) {
-    var myKeys = Object.keys(rawData[0]);
-    var endVar = myKeys[myKeys.length - 1];
-    var endYear = 2000 + +endVar.substring(2,4);
-    var begYear = endYear - 9;
+  // fy is an ordered array of the fiscal years, e.g. fy=['fy08','fy09',...]
+  function addYearButtons(fy) {
+    var begFy = fy[0];
+    var endFy = fy[fy.length - 1];
+    var begYear = 2000 + +begFy.substring(2,4);
+    var endYear = 2000 + +endFy.substring(2,4);
 
-    for (var i=0; i<myKeys.length; i++) {
+    for (var i=1; i<fy.length; i++) {
       d3.select('#year_toolbar').append('label')
         .attr('id', 'y' + i)
         .attr('class', 'btn btn-secondary')
@@ -96,7 +97,7 @@ function bubbleChart() {
     }
 
     // activate the button for the most recent year
-    d3.select('#y' + endYear).classed('active',true);
+    d3.select('#y' + (fy.length - 1)).classed('active',true);
 
     // resize the buttons
     d3.selectAll('.btn-group').selectAll('.btn').attr('style', "font-size: " + entry_size);
@@ -138,16 +139,37 @@ function bubbleChart() {
 
   function createNodes(rawData, fy) {
 
+    // variables available for each node
+    var myKeys = Object.keys(rawData[0]);
+
     // calculate the total budget for each year
     var total_budget = fy.map(function(d) {
       var out = d3.sum(rawData, function (dd) { return +dd[d + 'budget']; });
       return(out);
     })
-    myVar = total_budget;
 
-    // Use map() to convert raw data into node data, converting all fy names to fy0 through fy10
+    // Use map() to convert raw data into node data, converting all fy names to fy0 through fy[nYears-1]
     var myNodes = rawData.map(function (d) {
       var nYears = fy.length;
+
+      // complile arrays of expenditures, budget, salaries, and other for this node
+      var extract = function(varName) {
+        out = [];
+        for (i=0; i<myKeys.length; i++) {
+          if (myKeys[i].match(varName)) {
+            out.push(+d[myKeys[i]]);
+          }
+        }
+        return(out);
+      }
+
+      var budgetTmp = extract('budget');
+      var salariesTmp = extract('salaries');
+      var otherTmp = extract('other');
+      var expendituresTmp = salariesTmp.map(function(d,i) {return(d + otherTmp[i])});
+      var budgetPctTmp = budgetTmp.map(function(d,i) {return(100 * d / total_budget[i])});
+      var pctGrowthTmp = expendituresTmp.map(function(d,i) {return(((d / expendituresTmp[i-1]) - 1) * 100)});
+
       // create an object with basic node information
       var out = {
         x: Math.random() * 900,
@@ -157,20 +179,17 @@ function bubbleChart() {
         radius: radiusScale(+d[fy[nYears - 1] + 'salaries'] + +d[fy[nYears - 1] + 'other']),
         value: +d[fy[nYears - 1] + 'salaries'] + +d[fy[nYears - 1] + 'other'],
         name: d.name,
-        description: d.description
+        description: d.description,
+        budget: budgetTmp,
+        salaries: salariesTmp,
+        other: otherTmp,
+        expenditures: expendituresTmp,
+        budgetPct: budgetPctTmp,
+        pctGrowth: pctGrowthTmp,
+        fy: fy
       };
-      // add on the relevant expenditure info
-      for (var i=0; i<nYears; i++) {
-        out['FY' + i + 'Expenditures'] = +d[fy[i] + 'salaries'] + +d[fy[i] + 'other'];
-        out['FY' + i + 'Budget'] = +d[fy[i] + 'budget'];
-        out['FY' + i + 'Salaries'] = +d[fy[i] + 'salaries'];
-        out['FY' + i + 'Other'] = +d[fy[i] + 'other'];
-      }
-      // calculate budget as % of total budget and % growth of expenditures
-      for (var i=1; i<nYears; i++) {
-        out['FY' + i + 'Percent'] = 100 * d[fy[i] + 'budget'] / total_budget[i];
-        out['FY' + i + 'PercentGrowth'] = ((d['FY' + i + 'Expenditures'] / d['FY' + (i-1) + 'Expenditures']) - 1) * 100;
-      }
+
+      myVar = out;
       return(out);
     });
 
@@ -295,7 +314,7 @@ function bubbleChart() {
     var maxAmount = d3.max(rawData, function (d) { return +d[fy[fy.length - 1] + 'salaries'] + +d[fy[fy.length - 1] + 'other']; });
     radiusScale.domain([0, maxAmount]);
 
-    addYearButtons(rawData);
+    addYearButtons(fy);
 
     setupButtons();
 
@@ -396,14 +415,6 @@ function bubbleChart() {
 
   };
 
-  // function for calculating percent growth
-  pct_growth = function(d) {
-    fiscal_years = ["2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008"];
-    expenditures = [d.FY17Expenditures, d.FY16Expenditures, d.FY15Expenditures, d.FY14Expenditures, d.FY13Expenditures, d.FY12Expenditures, d.FY11Expenditures, d.FY10Expenditures, d.FY09Expenditures, d.FY08Expenditures, d.FY07Expenditures];
-    index = fiscal_years.indexOf(currentYear);
-    return 100 * (expenditures[index] - expenditures[index+1]) / expenditures[index+1];
-  };
-
   function colorCategories() {
     svg.selectAll('circle')
       .transition()
@@ -422,7 +433,7 @@ function bubbleChart() {
       .transition()
       .duration(400)
       .attr('fill', function (d) {
-        value = pct_growth(d);
+        value = d.pctGrowth[currentYear];
         if (isNaN(value)) {
           out = '#000000';          
         } else {
@@ -431,7 +442,7 @@ function bubbleChart() {
         return out;
       })
       .attr('stroke', function (d) {
-        value = pct_growth(d);
+        value = d.pctGrowth[currentYear];
         if (isNaN(value)) {
           out = '#000000';          
         } else {
@@ -546,38 +557,20 @@ function bubbleChart() {
     cy = +d3.select(this).attr('cy');
     r = +d3.select(this).attr('r');
 
-    // select current fiscal year for generating content
+    // select current fiscal year for generating content (this is an index of the fiscal year)
     currentYear = d3.select('#year_toolbar').selectAll('.btn').filter('.active').attr('id').match(/\d+/g)[0];
-
-    // necessary variables for generating content
-    fiscal_years = ["2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008"];
-    budgets = [d.FY17Budget, d.FY16Budget, d.FY15Budget, d.FY14Budget, d.FY13Budget, d.FY12Budget, d.FY11Budget, d.FY10Budget, d.FY09Budget, d.FY08Budget];
-    expenditures = [d.FY17Expenditures, d.FY16Expenditures, d.FY15Expenditures, d.FY14Expenditures, d.FY13Expenditures, d.FY12Expenditures, d.FY11Expenditures, d.FY10Expenditures, d.FY09Expenditures, d.FY08Expenditures, d.FY07Expenditures];
-    salaries = [d.FY17Salaries, d.FY16Salaries, d.FY15Salaries, d.FY14Salaries, d.FY13Salaries, d.FY12Salaries, d.FY11Salaries, d.FY10Salaries, d.FY09Salaries, d.FY08Salaries];
-    others = [d.FY17Other, d.FY16Other, d.FY15Other, d.FY14Other, d.FY13Other, d.FY12Other, d.FY11Other, d.FY10Other, d.FY09Other, d.FY08Other];
-    percents = [d.FY17Percent, d.FY16Percent, d.FY15Percent, d.FY14Percent, d.FY13Percent, d.FY12Percent, d.FY11Percent, d.FY10Percent, d.FY09Percent, d.FY08Percent];
-
-    // index of current year
-    index = fiscal_years.indexOf(currentYear);
-
-    // generate content
-    fyText = fiscal_years[index];
-    salaries_tmp = salaries[index];
-    others_tmp = others[index];
-    expenditures_tmp = expenditures[index];
-    budget_tmp = budgets[index];
-    pct_growth_tmp = Math.ceil(100 * 100 * (expenditures[index] - expenditures[index+1]) / expenditures[index+1])/100;
+    fyText = 2000 + +d.fy[currentYear].substring(2,4);
 
     var content = '<span class="name">' + d.name + '</span>' +
                   '<table><tr><td colspan="2" style="text-align:center; text-decoration: underline">Fiscal Year ' + fyText + '</td></tr>' + 
                   '<tr height=5px></tr>' +
-                  '<tr><td>Salaries</td><td style="text-align: center">' + formatAmount(salaries_tmp) + '</td></tr>' +
-                  '<tr><td>Other</td><td style="text-align: center">' + formatAmount(others_tmp) + '</td></tr>' +
-                  '<tr><td>Total</td><td style="text-align: center">' + formatAmount(expenditures_tmp) + '</td></tr>' +
-                  '<tr><td>Annual growth</td><td style="text-align: center">' + formatPercent(pct_growth_tmp) + '</td></tr>' + 
+                  '<tr><td>Salaries</td><td style="text-align: center">' + formatAmount(d.salaries[currentYear]) + '</td></tr>' +
+                  '<tr><td>Other</td><td style="text-align: center">' + formatAmount(d.other[currentYear]) + '</td></tr>' +
+                  '<tr><td>Total</td><td style="text-align: center">' + formatAmount(d.expenditures[currentYear]) + '</td></tr>' +
+                  '<tr><td>Annual growth</td><td style="text-align: center">' + formatPercent(d.pctGrowth[currentYear]) + '</td></tr>' + 
                   '<tr height=5px></tr>' + 
-                  '<tr><td>Budget</td><td style="text-align: center">' + formatAmount(budget_tmp) + '</td></tr>' +
-                  '<tr><td>Percent of total budget</td><td style="text-align: center">' + formatPercent(percents[index]) + '</td></tr></table>' + 
+                  '<tr><td>Budget</td><td style="text-align: center">' + formatAmount(d.budget[currentYear]) + '</td></tr>' +
+                  '<tr><td>Percent of total budget</td><td style="text-align: center">' + formatPercent(d.budgetPct[currentYear]) + '</td></tr></table>' + 
                   '<div style="height: 5px"></div>' + 
                   '<p style="text-align: center; margin: 0px 0px 0px 0px">(Click bubble for more info)</p>';
 
@@ -644,10 +637,11 @@ function bubbleChart() {
     });
 
     // make the graph
-    var yearArray = ['2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017'];
-    var salaryArray = [+d.FY08Salaries, +d.FY09Salaries, +d.FY10Salaries, +d.FY11Salaries, +d.FY12Salaries, +d.FY13Salaries, +d.FY14Salaries, +d.FY15Salaries, +d.FY16Salaries, +d.FY17Salaries];
-    var otherArray = [+d.FY08Other, +d.FY09Other, +d.FY10Other, +d.FY11Other, +d.FY12Other, +d.FY13Other, +d.FY14Other, +d.FY15Other, +d.FY16Other, +d.FY17Other];
-    var budgetArray = [+d.FY08Budget, +d.FY09Budget, +d.FY10Budget, +d.FY11Budget, +d.FY12Budget, +d.FY13Budget, +d.FY14Budget, +d.FY15Budget, +d.FY16Budget, +d.FY17Budget];
+    var nYears = d.fy.length;
+    var yearArray = d.fy.map(function(d) {return(2000 + +d.substring(2,4))}).slice(1,nYears);
+    var salaryArray = d.salaries.slice(1, nYears);
+    var otherArray = d.other.slice(1, nYears);
+    var budgetArray = d.budget.slice(1, nYears);
     var myData = yearArray.map(function(val, index) {
       return {year: val, budget: budgetArray[index]/1e6, salary: salaryArray[index]/1e6, other: otherArray[index]/1e6}
     });
@@ -709,22 +703,22 @@ function bubbleChart() {
 
     var xScale = d3.time.scale()
       .range([graphX, graphX + graphWidth])
-      .domain([parseTime(d3.min(yearArray)),parseTime(d3.max(yearArray))]);
+      .domain([d3.min(yearArray),d3.max(yearArray)]);
     var yScale = d3.scale.linear()
       .range([graphY + graphHeight, graphY])
       .domain([ymin, ymax])
       .nice();
 
     var budgetLine = d3.svg.line()
-      .x(function(d) { return xScale(parseTime(d.year)); })
+      .x(function(d) { return xScale(d.year); })
       .y(function(d) { return yScale(d.budget); });
 
     var salaryLine = d3.svg.line()
-      .x(function(d) { return xScale(parseTime(d.year)); })
+      .x(function(d) { return xScale(d.year); })
       .y(function(d) { return yScale(d.salary); });
 
     var otherLine = d3.svg.line()
-      .x(function(d) { return xScale(parseTime(d.year)); })
+      .x(function(d) { return xScale(d.year); })
       .y(function(d) { return yScale(d.other); });
     
     svg.append("g")
@@ -884,22 +878,20 @@ function bubbleChart() {
   };
 
   // return the radius for a particular bubble, given a scale variable and year
+  // (year is an index, from 0 to # of years)
   findRadius = function (d, scaleVar, year) {
-    // pick out the index of the current year
-    fiscal_years = ["2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008"];
-    index = fiscal_years.indexOf(currentYear);
 
     // set "values" array equal to array of scale variable
     if (scaleVar=='total') {
-      values = [+d.FY17Expenditures, +d.FY16Expenditures, +d.FY15Expenditures, +d.FY14Expenditures, +d.FY13Expenditures, +d.FY12Expenditures, +d.FY11Expenditures, +d.FY10Expenditures, +d.FY09Expenditures, +d.FY08Expenditures];
+      values = d.expenditures;
     } else if (scaleVar=='salaries'){
-      values = [+d.FY17Salaries, +d.FY16Salaries, +d.FY15Salaries, +d.FY14Salaries, +d.FY13Salaries, +d.FY12Salaries, +d.FY11Salaries, +d.FY10Salaries, +d.FY09Salaries, +d.FY08Salaries];
+      values = d.salaries;
     } else if (scaleVar=='other') {
-      values = [+d.FY17Other, +d.FY16Other, +d.FY15Other, +d.FY14Other, +d.FY13Other, +d.FY12Other, +d.FY11Other, +d.FY10Other, +d.FY09Other, +d.FY08Other];
+      values = d.other;
     }
 
     // return the desired value
-    return radiusScale(values[index]);
+    return radiusScale(values[year]);
   }
 
 
@@ -920,7 +912,7 @@ function bubbleChart() {
         if (colorScheme == 'category') {
           return categoryColor(d.category);
         } else if (colorScheme = 'growth'){
-          value = pct_growth(d);
+          value = d.pctGrowth[currentYear];
           if (isNaN(value)) {
             out = '#000000';          
           } else {
@@ -933,7 +925,7 @@ function bubbleChart() {
         if (colorScheme == 'category') {
           return d3.rgb(categoryColor(d.category)).darker(); 
         } else if (colorScheme == 'growth') {
-          value = pct_growth(d);
+          value = d.pctGrowth[currentYear];
           if (isNaN(value)) {
             out = '#000000';          
           } else {

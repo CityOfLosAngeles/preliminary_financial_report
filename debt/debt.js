@@ -375,7 +375,6 @@ d3.csv("debt.csv", function(d) {
   d.approvedDebtPct = +d.Voter_Approved_Debt_Percent;
   d.totalDebtPct = +d.Total_Debt_Percent;
   d.unapprovedDebtCap = +d.Non_Voter_Approved_Debt_Cap;
-  d.approvedDebtCap = +d.Voter_Approved_Debt_Cap;
   d.totalDebtCap = +d.Total_Debt_Cap;
   return d;
 }, plotData);
